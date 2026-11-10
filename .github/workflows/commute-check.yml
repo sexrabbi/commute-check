@@ -1,0 +1,34 @@
+name: Commute Check
+
+on:
+  schedule:
+    # 7:40-7:55 CST (UTC+8) → UTC 23:40-23:55 (前一日, 周日~周四)
+    - cron: '40,45,50,55 23 * * 0-4'
+    # 8:00 CST → UTC 0:00 (当日, 周一~周五)
+    - cron: '0 0 * * 1-5'
+  workflow_dispatch:  # 支持手动触发测试
+
+jobs:
+  commute:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run commute check
+        env:
+          AMAP_KEY: ${{ secrets.AMAP_KEY }}
+          SERVERCHAN_KEY: ${{ secrets.SERVERCHAN_KEY }}
+          HOME_ADDRESS: ${{ secrets.HOME_ADDRESS }}
+          COMPANY_ADDRESS: ${{ secrets.COMPANY_ADDRESS }}
+          HOME_CITY: ${{ secrets.HOME_CITY }}
+          COMPANY_CITY: ${{ secrets.COMPANY_CITY }}
+          WORK_START_HOUR: '9'
+          WORK_START_MINUTE: '0'
+          BUFFER_MINUTES: '15'
+        run: python commute_check.py
